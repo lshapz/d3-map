@@ -1,17 +1,58 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <Tree :treeData="treeData" />
+    <Button :method="addNode" name="Add a Node" />
+    <Button :method="removeNode" name="Remove a Node" />
+
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Tree from './components/Tree.vue'
+import Button from './components/Button.vue'
 
 export default {
   name: 'app',
   components: {
-    HelloWorld
+    Tree,
+    Button
+  },
+  data() {
+    return {
+    treeData:   {
+      "name": "Top Level",
+      "children": [
+        { 
+          "name": "Level 2: A",
+          "children": [
+            { "name": "Son of A" },
+            { "name": "Daughter of A" }
+          ]
+        },
+        { "name": "Level 2: B" }
+      ]
+    }
+    }
+  },
+  methods: {
+    addNode() {
+      let foo = this.treeData;
+      this.treeData = {}
+      foo.children.push({"name": "Level 3: C"})
+      this.treeData = foo;
+    },
+    removeNode() {
+      let foo = this.treeData;
+      this.treeData = {}
+
+      foo.children.splice(foo.children.length - 1, 1)
+      this.treeData = foo;
+    }
+  },
+  watch: {
+    treeData(newdata, olddata) {
+      debugger
+    }
   }
 }
 </script>
