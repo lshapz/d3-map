@@ -20,10 +20,18 @@ export default {
     }
   },
   methods: {
+    updateText(a) {
+      let currentText = a.data.name;
+      // now we should send it up to level one and open a modal that can change the text 
+      console.log(currentText)
+      this.$emit('childToParent', currentText)
+    },
     drawTree() {
+      // BASED ON CODE FROM https://bl.ocks.org/d3noob/1a96af738c89b88723eb63456beb6510 
 //  Set the dimensions and margins of the diagram
     d3.select(".graph svg").remove();
     // debugger
+    let localThis = this;
 
       var margin = {top: 20, right: 90, bottom: 30, left: 90},
         width = 960 - margin.left - margin.right,
@@ -108,7 +116,8 @@ export default {
           .attr("text-anchor", function(d) {
               return d.children || d._children ? "end" : "start";
           })
-          .text(function(d) { return d.data.name; });
+          .text(function(d) { return d.data.name; })
+          .on("click", localThis.updateText);
 
       // UPDATE
       var nodeUpdate = nodeEnter.merge(node);
@@ -216,18 +225,12 @@ export default {
       handler(newdata, olddata){
         console.log('new', newdata)
         console.log('old', olddata)
-  
-        debugger
         this.drawTree()
 
       }
     }
   },
   computed: {
-    // treeDataComp() {
-    //   debugger
-    //   return this.treeData;
-    // }
   }
 }
 </script>
