@@ -50,7 +50,6 @@ export default {
     removeNode() {
       let foo = this.treeData;
       this.treeData = {};
-
       foo.children.splice(foo.children.length - 1, 1)
       this.treeData = foo;
     },

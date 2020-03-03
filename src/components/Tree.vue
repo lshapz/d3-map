@@ -26,10 +26,11 @@ export default {
       console.log(currentText)
       this.$emit('childToParent', currentText)
     },
-    drawTree() {
+    drawTree(redraw = false) {
       // BASED ON CODE FROM https://bl.ocks.org/d3noob/1a96af738c89b88723eb63456beb6510 
 //  Set the dimensions and margins of the diagram
-    d3.select(".graph svg").remove();
+  
+    // d3.select(".graph svg").remove();
     // debugger
     let localThis = this;
 
@@ -37,16 +38,24 @@ export default {
         width = 960 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
+    var svg;
     // append the svg object to the body of the page
     // appends a 'group' element to 'svg'
     // moves the 'group' element to the top left margin
-    var svg = d3.select(".graph").append("svg")
-        .attr("width", width + margin.right + margin.left)
-        .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-        .attr("transform", "translate("
-              + margin.left + "," + margin.top + ")");
+    if (!redraw) {
 
+      svg = d3.select(".graph").append("svg")
+          .attr("width", width + margin.right + margin.left)
+          .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("class","foobar")
+          .attr("transform", "translate("
+                + margin.left + "," + margin.top + ")");
+    } else {
+
+      svg = d3.select(".graph svg")
+    }
+    
     var i = 0,
         duration = 750,
         root;
@@ -91,6 +100,7 @@ export default {
       var node = svg.selectAll('g.node')
           .data(nodes, function(d) {return d.id || (d.id = ++i); });
 
+    debugger
       // Enter any new modes at the parent's previous position.
       var nodeEnter = node.enter().append('g')
           .attr('class', 'node')
@@ -225,7 +235,7 @@ export default {
       handler(newdata, olddata){
         console.log('new', newdata)
         console.log('old', olddata)
-        this.drawTree()
+        this.drawTree(true)
 
       }
     }
