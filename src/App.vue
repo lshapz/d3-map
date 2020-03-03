@@ -1,9 +1,14 @@
 <template>
   <div id="app">
+    <Button :method="loadTree" name="Toggle Tree Display" />
+
+  <div v-if="treeShow">
     <Tree :treeData="treeData" v-on:childToParent="setUpdateForm"/>
     <Button :method="addNode" name="Add a Node" />
     <Button :method="removeNode" name="Remove a Node" />
   <UpdateForm v-if="midChange" :savedText="currentText" v-on:childToParent="changeText"></UpdateForm>
+
+  </div>
   </div>
 </template>
 
@@ -37,10 +42,14 @@ export default {
     },
     midChange: false,
     currentText: "",
-    parentName: ""
+    parentName: "",
+    treeShow: true
     }
   },
   methods: {
+    loadTree() {
+      this.treeShow = !this.treeShow;
+    },
     addNode() {
       let foo = this.treeData;
       this.treeData = {};

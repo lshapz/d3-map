@@ -12,80 +12,70 @@ export default {
   props: {
     treeData: Object
   },
+  computed: {
+    width() {
+      return 960-this.margin.left - this.margin.right
+    },
+    height() {
+      return 500 - this.margin.left - this.margin.right
+    }
+  },
   mounted(){
     this.drawTree();
   },
   data() {
     return {
+      margin: {top: 20, right: 90, bottom: 30, left: 90},
+      svg: null,
+      i: 0, 
+      duration: 750,
+      root: null,
+      treemap: null,
+      // treeData: null,
+      // nodes: null,
+      // links: null,
+      // node: null,
+      // nodeEnter: null,
+      // nodeUpdate: null,
+      // nodeExit: null,
+      // link: null,
+      // linkEnter: null,
+      // linkUpdate: null,
+      // linkExit: null,
+
     }
   },
   methods: {
-    updateText(a) {
-      let currentText = a.data.name;
-      // now we should send it up to level one and open a modal that can change the text 
-      console.log(currentText)
-      this.$emit('childToParent', currentText)
+    diagonal(s, d) {
+
+        let path = `M ${s.y} ${s.x}
+                C ${(s.y + d.y) / 2} ${s.x},
+                  ${(s.y + d.y) / 2} ${d.x},
+                  ${d.y} ${d.x}`
+
+        return path
     },
-    drawTree(redraw = false) {
-      // BASED ON CODE FROM https://bl.ocks.org/d3noob/1a96af738c89b88723eb63456beb6510 
-//  Set the dimensions and margins of the diagram
-  
-    // d3.select(".graph svg").remove();
-    // debugger
-    let localThis = this;
-
-      var margin = {top: 20, right: 90, bottom: 30, left: 90},
-        width = 960 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom;
-
-    var svg;
-    // append the svg object to the body of the page
-    // appends a 'group' element to 'svg'
-    // moves the 'group' element to the top left margin
-    if (!redraw) {
-
-      svg = d3.select(".graph").append("svg")
-          .attr("width", width + margin.right + margin.left)
-          .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("class","foobar")
-          .attr("transform", "translate("
-                + margin.left + "," + margin.top + ")");
-    } else {
-
-      svg = d3.select(".graph svg")
-    }
-    
-    var i = 0,
-        duration = 750,
-        root;
-
-    // declares a tree layout and assigns the size
-    var treemap = d3.tree().size([height, width]);
-
-    // Assigns parent, children, height, depth
-    root = d3.hierarchy(this.treeData, function(d) { return d.children; });
-    root.x0 = height / 2;
-    root.y0 = 0;
-
-    // Collapse after the second level
-    root.children.forEach(collapse);
-
-    update(root);
-
-    // Collapse the node and all it's children
-    function collapse(d) {
+    click(d) {
+        if (d.children) {
+            d._children = d.children;
+            d.children = null;
+          } else {
+            d.children = d._children;
+            d._children = null;
+          }
+        this.update(d);
+    },
+    collapse(d){
       if(d.children) {
         d._children = d.children
-        d._children.forEach(collapse)
+        d._children.forEach(this.collapse)
         d.children = null
       }
-    }
-
-    function update(source) {
-
+    },
+    update(source) {
+      let localThis = this;
       // Assigns the x and y position for the nodes
-      var treeData = treemap(root);
+      var treeData = this.treemap(this.root);
 
       // Compute the new tree layout.
       var nodes = treeData.descendants(),
@@ -97,17 +87,16 @@ export default {
       // ****************** Nodes section ***************************
 
       // Update the nodes...
-      var node = svg.selectAll('g.node')
-          .data(nodes, function(d) {return d.id || (d.id = ++i); });
+      var node = this.svg.selectAll('g.node')
+          .data(nodes, function(d) {return d.id || (d.id = ++this.i); });
 
-    debugger
       // Enter any new modes at the parent's previous position.
       var nodeEnter = node.enter().append('g')
           .attr('class', 'node')
           .attr("transform", function(d) {
             return "translate(" + source.y0 + "," + source.x0 + ")";
         })
-        .on('click', click);
+        .on('click', this.click);
 
       // Add Circle for the nodes
       nodeEnter.append('circle')
@@ -134,7 +123,7 @@ export default {
 
       // Transition to the proper position for the node
       nodeUpdate.transition()
-        .duration(duration)
+        .duration(this.duration)
         .attr("transform", function(d) { 
             return "translate(" + d.y + "," + d.x + ")";
         });
@@ -150,7 +139,7 @@ export default {
 
       // Remove any exiting nodes
       var nodeExit = node.exit().transition()
-          .duration(duration)
+          .duration(this.duration)
           .attr("transform", function(d) {
               return "translate(" + source.y + "," + source.x + ")";
           })
@@ -167,7 +156,7 @@ export default {
       // ****************** links section ***************************
 
       // Update the links...
-      var link = svg.selectAll('path.link')
+      var link = this.svg.selectAll('path.link')
           .data(links, function(d) { return d.id; });
 
       // Enter any new links at the parent's previous position.
@@ -175,7 +164,7 @@ export default {
           .attr("class", "link")
           .attr('d', function(d){
             var o = {x: source.x0, y: source.y0}
-            return diagonal(o, o)
+            return localThis.diagonal(o, o)
           });
 
       // UPDATE
@@ -183,15 +172,15 @@ export default {
 
       // Transition back to the parent element position
       linkUpdate.transition()
-          .duration(duration)
-          .attr('d', function(d){ return diagonal(d, d.parent) });
+          .duration(this.duration)
+          .attr('d', function(d){ return localThis.diagonal(d, d.parent) });
 
       // Remove any exiting links
       var linkExit = link.exit().transition()
-          .duration(duration)
+          .duration(this.duration)
           .attr('d', function(d) {
             var o = {x: source.x, y: source.y}
-            return diagonal(o, o)
+            return localThis.diagonal(o, o)
           })
           .remove();
 
@@ -202,28 +191,65 @@ export default {
       });
 
       // Creates a curved (diagonal) path from parent to the child nodes
-      function diagonal(s, d) {
-
-        let path = `M ${s.y} ${s.x}
-                C ${(s.y + d.y) / 2} ${s.x},
-                  ${(s.y + d.y) / 2} ${d.x},
-                  ${d.y} ${d.x}`
-
-        return path
-      }
 
       // Toggle children on click.
-      function click(d) {
-        if (d.children) {
-            d._children = d.children;
-            d.children = null;
-          } else {
-            d.children = d._children;
-            d._children = null;
-          }
-        update(d);
-      }
-    }
+    },
+    updateText(a) {
+      let currentText = a.data.name;
+      // now we should send it up to level one and open a modal that can change the text 
+      console.log(currentText)
+      this.$emit('childToParent', currentText)
+    },
+    drawTree(source = this.root) {
+      // BASED ON CODE FROM https://bl.ocks.org/d3noob/1a96af738c89b88723eb63456beb6510 
+      //  Set the dimensions and margins of the diagram
+  
+    // d3.select(".graph svg").remove();
+    // debugger
+
+      var margin = this.margin,
+        width = this.width,
+        height = this.height;
+
+    var svg;
+    // append the svg object to the body of the page
+    // appends a 'group' element to 'svg'
+    // moves the 'group' element to the top left margin
+    // if (!redraw) {
+
+      svg = d3.select(".graph").append("svg")
+          .attr("width", width + margin.right + margin.left)
+          .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("class","foobar")
+          .attr("transform", "translate("
+                + margin.left + "," + margin.top + ")");
+    // } else {
+    //   svg = d3.select(".graph svg")
+    // }
+
+    this.svg = svg;
+    
+    var root;
+
+    // declares a tree layout and assigns the size
+    var treemap = d3.tree().size([height, width]);
+    this.treemap =treemap;
+
+    // Assigns parent, children, height, depth
+    root = d3.hierarchy(this.treeData, function(d) { return d.children; });
+    root.x0 = height / 2;
+    root.y0 = 0;
+    this.root = root;
+    // Collapse after the second level
+    // root.children.forEach(collapse);
+
+    this.update(source);
+
+    // Collapse the node and all it's children
+
+
+    
 
 
     }
@@ -233,14 +259,17 @@ export default {
       immediate: true,
       deep: true,
       handler(newdata, olddata){
+        debugger
         console.log('new', newdata)
         console.log('old', olddata)
-        this.drawTree(true)
+        if (!!olddata) {
+          this.drawTree(this.root)
+        } else {
+          this.drawTree(this.treemap)
+        }
 
       }
     }
-  },
-  computed: {
   }
 }
 </script>
