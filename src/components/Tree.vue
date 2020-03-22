@@ -14,10 +14,10 @@ export default {
   },
   computed: {
     width() {
-      return 960-this.margin.left - this.margin.right
+      return 2000-this.margin.left - this.margin.right
     },
     height() {
-      return 500 - this.margin.left - this.margin.right
+      return 2000 - this.margin.left - this.margin.right
     }
   },
   mounted(){
@@ -46,6 +46,30 @@ export default {
     }
   },
   methods: {
+     wrap(text, width) {
+  text.each(function() {
+    var text = d3.select(this),
+        words = text.text().split(/\s+/).reverse(),
+        word,
+        line = [],
+        lineNumber = 0,
+        lineHeight = 1.1, // ems
+        y = text.attr("y"),
+        dy = parseFloat(text.attr("dy")),
+        tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+    while (word = words.pop()) {
+      line.push(word);
+      tspan.text(line.join(" "));
+      if (tspan.node().getComputedTextLength() > width) {
+        line.pop();
+        tspan.text(line.join(" "));
+        line = [word];
+        tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+      }
+    }
+  });
+},
+
     diagonal(s, d) {
 
         let path = `M ${s.y} ${s.x}
@@ -99,9 +123,32 @@ export default {
         .on('click', this.click);
 
       // Add Circle for the nodes
-      nodeEnter.append('circle')
+      nodeEnter.append('rect')
           .attr('class', 'node')
-          .attr('r', 1e-6)
+          .attr('x', function(d){
+              if (!d.children) {
+                return d.x
+              } else {
+                return "0"
+              }
+
+          })
+          // .attr('x', function(d){return d.x})
+          .attr('y', function(d){return d.y})
+          .attr("width", "130")
+          .attr("height", function(d) {
+            if (d.data.name.length > 100) {
+              return "300"
+            } else {
+              return "100"
+            }
+            // debugger
+          })
+          .attr("stroke", "black")
+          // .attr('r', 1e-6)
+        .attr("transform", function(d) { 
+            return "translate(" + 0 + "," + 0 + ")";
+        })
           .style("fill", function(d) {
               return d._children ? "lightsteelblue" : "#fff";
           });
@@ -110,12 +157,20 @@ export default {
       nodeEnter.append('text')
           .attr("dy", ".35em")
           .attr("x", function(d) {
-              return d.children || d._children ? -13 : 13;
+            return d.x
+              // return d.children || d._children ? -13 : 13;
+          })
+          .attr("y", function(d){
+            return d.y
           })
           .attr("text-anchor", function(d) {
               return d.children || d._children ? "end" : "start";
           })
           .text(function(d) { return d.data.name; })
+          .call(localThis.wrap, 100)
+          .attr("transform", function(d) { 
+            return "translate(" + d.y + "," + 0 + ")";
+        })
           .on("click", localThis.updateText);
 
       // UPDATE
@@ -220,6 +275,12 @@ export default {
       svg = d3.select(".graph").append("svg")
           .attr("width", width + margin.right + margin.left)
           .attr("height", height + margin.top + margin.bottom)
+  //         .data(d3.entries( { "top-to-bottom": {
+  //   size: [width, height],
+  //   x: function(d) { return d.x; },
+  //   y: function(d) { return d.y; }
+  // }
+  //         }))
         .append("g")
         .attr("class","foobar")
           .attr("transform", "translate("
@@ -233,7 +294,7 @@ export default {
     var root;
 
     // declares a tree layout and assigns the size
-    var treemap = d3.tree().size([height, width]);
+    var treemap = d3.tree().size([height  / 2, width]);
     this.treemap =treemap;
 
     // Assigns parent, children, height, depth
@@ -259,7 +320,7 @@ export default {
       immediate: true,
       deep: true,
       handler(newdata, olddata){
-        debugger
+        // debugger
         console.log('new', newdata)
         console.log('old', olddata)
         if (!!olddata) {
