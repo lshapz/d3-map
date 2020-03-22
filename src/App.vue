@@ -52,7 +52,17 @@ export default {
               ]
             }
           ] 
-        }
+        },
+        {"name": "Level 2: D",
+        "children": [
+          {"name": "Level 3: D", "children": [
+            {"name": "Vivamus suscipit quam vitae justo pulvinar, nec maximus lectus sagittis. Phasellus vitae dui eget nibh venenatis cursus in vitae libero. Ut sed malesuada mauris. Curabitur id odio id sem sagittis pretium at sagittis dui."},
+             {"name": "Duis quis massa ultricies, eleifend est id, mollis nisl. Nulla facilisi. Pellentesque aliquet, tortor a tincidunt pellentesque, ex diam commodo dolor, a pulvinar mauris augue at libero. Vestibulum orci nunc, luctus vitae felis vel", 
+             "children": [{"name": "Level 4: D"}, {"name": "In in lectus vel dolor convallis dictum. Nunc quis consequat tortor. Vivamus semper nisl justo, in vulputate enim tempus bibendum. Ut non interdum enim, ac porttitor orci. Nunc eget aliquet purus. Aenean et mattis sem."}]
+             }
+            ]}
+
+        ]}
       ]
     },
     midChange: false,

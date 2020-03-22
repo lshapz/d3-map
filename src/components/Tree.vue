@@ -14,10 +14,10 @@ export default {
   },
   computed: {
     width() {
-      return 2000-this.margin.left - this.margin.right
+      return 1300-this.margin.left - this.margin.right
     },
     height() {
-      return 2000 - this.margin.left - this.margin.right
+      return 1300 - this.margin.left - this.margin.right
     }
   },
   mounted(){
@@ -47,36 +47,33 @@ export default {
   },
   methods: {
      wrap(text, width) {
-  text.each(function() {
-    var text = d3.select(this),
-        words = text.text().split(/\s+/).reverse(),
-        word,
-        line = [],
-        lineNumber = 0,
-        lineHeight = 1.1, // ems
-        y = text.attr("y"),
-        dy = parseFloat(text.attr("dy")),
-        tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
-    while (word = words.pop()) {
-      line.push(word);
-      tspan.text(line.join(" "));
-      if (tspan.node().getComputedTextLength() > width) {
-        line.pop();
-        tspan.text(line.join(" "));
-        line = [word];
-        tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
-      }
-    }
-  });
-},
-
+      text.each(function() {
+        var text = d3.select(this),
+            words = text.text().split(/\s+/).reverse(),
+            word,
+            line = [],
+            lineNumber = 0,
+            lineHeight = 1.1, // ems
+            y = text.attr("y"),
+            dy = parseFloat(text.attr("dy")),
+            tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+        while (word = words.pop()) {
+          line.push(word);
+          tspan.text(line.join(" "));
+          if (tspan.node().getComputedTextLength() > width) {
+            line.pop();
+            tspan.text(line.join(" "));
+            line = [word];
+            tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+          }
+        }
+      });
+    },
     diagonal(s, d) {
-
         let path = `M ${s.y} ${s.x}
                 C ${(s.y + d.y) / 2} ${s.x},
                   ${(s.y + d.y) / 2} ${d.x},
                   ${d.y} ${d.x}`
-
         return path
     },
     click(d) {
@@ -145,7 +142,7 @@ export default {
           //   // debugger
           // })
           // .attr("stroke", "black")
-          .attr('r', 1e-6)
+          // .attr('r', "100")
         // .attr("transform", function(d) { 
         //     return "translate(" + 0 + "," + 0 + ")";
         // })
@@ -163,13 +160,14 @@ export default {
           .attr("y", function(d){
             return d.y
           })
-          .attr("text-anchor", function(d) {
-              return d.children || d._children ? "end" : "start";
-          })
+          .attr("text-anchor", "middle")
+          // .attr("text-anchor", function(d) {
+          //     return d.children || d._children ? "end" : "start";
+          // })
           .text(function(d) { return d.data.name; })
-          .call(localThis.wrap, 100)
+          .call(localThis.wrap, 150)
           .attr("transform", function(d) { 
-            return "translate(" + 0 + "," + -d.y + ")";
+            return "translate(" + 0 + "," + (-d.y + 20) + ")";
         });
           // .on("click", localThis.updateText);
 
@@ -180,7 +178,7 @@ export default {
       nodeUpdate.transition()
         .duration(this.duration)
         .attr("transform", function(d) { 
-            return "translate(" + d.y + "," + d.x + ")";
+            return "translate(" + d.x + "," + d.y + ")";
         });
 
       // Update the node attributes and style
