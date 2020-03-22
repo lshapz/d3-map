@@ -70,10 +70,10 @@ export default {
       });
     },
     diagonal(s, d) {
-        let path = `M ${s.y} ${s.x}
-                C ${(s.y + d.y) / 2} ${s.x},
-                  ${(s.y + d.y) / 2} ${d.x},
-                  ${d.y} ${d.x}`
+        let path = `M ${s.x} ${s.y}
+                C ${(s.x + d.x) / 2} ${s.y},
+                  ${(s.x + d.x) / 2} ${d.y},
+                  ${d.x} ${d.y}`
         return path
     },
     click(d) {
