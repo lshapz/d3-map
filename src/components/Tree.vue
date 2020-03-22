@@ -123,32 +123,32 @@ export default {
         .on('click', this.click);
 
       // Add Circle for the nodes
-      nodeEnter.append('rect')
+      nodeEnter.append('circle')
           .attr('class', 'node')
-          .attr('x', function(d){
-              if (!d.children) {
-                return d.x
-              } else {
-                return "0"
-              }
+          // .attr('x', function(d){
+          //     if (!d.children) {
+          //       return d.x
+          //     } else {
+          //       return "0"
+          //     }
 
-          })
-          // .attr('x', function(d){return d.x})
+          // })
+          .attr('x', function(d){return d.x})
           .attr('y', function(d){return d.y})
-          .attr("width", "130")
-          .attr("height", function(d) {
-            if (d.data.name.length > 100) {
-              return "300"
-            } else {
-              return "100"
-            }
-            // debugger
-          })
-          .attr("stroke", "black")
-          // .attr('r', 1e-6)
-        .attr("transform", function(d) { 
-            return "translate(" + 0 + "," + 0 + ")";
-        })
+          // .attr("width", "130")
+          // .attr("height", function(d) {
+          //   if (d.data.name.length > 100) {
+          //     return "300"
+          //   } else {
+          //     return "100"
+          //   }
+          //   // debugger
+          // })
+          // .attr("stroke", "black")
+          .attr('r', 1e-6)
+        // .attr("transform", function(d) { 
+        //     return "translate(" + 0 + "," + 0 + ")";
+        // })
           .style("fill", function(d) {
               return d._children ? "lightsteelblue" : "#fff";
           });
@@ -169,9 +169,9 @@ export default {
           .text(function(d) { return d.data.name; })
           .call(localThis.wrap, 100)
           .attr("transform", function(d) { 
-            return "translate(" + d.y + "," + 0 + ")";
-        })
-          .on("click", localThis.updateText);
+            return "translate(" + 0 + "," + -d.y + ")";
+        });
+          // .on("click", localThis.updateText);
 
       // UPDATE
       var nodeUpdate = nodeEnter.merge(node);
