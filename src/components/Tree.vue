@@ -28,7 +28,7 @@ export default {
       margin: {top: 20, right: 90, bottom: 30, left: 90},
       svg: null,
       i: 0, 
-      duration: 750,
+      duration: 500,
       root: null,
       treemap: null,
       // treeData: null,
@@ -103,7 +103,12 @@ export default {
           links = treeData.descendants().slice(1);
 
       // Normalize for fixed-depth.
-      nodes.forEach(function(d){ d.y = d.depth * 180});
+      nodes.forEach(function(d){
+        d.y = d.depth * 180
+        // if (!d.children) {
+        //   d.x = d.x + 100
+        // }
+        });
 
       // ****************** Nodes section ***************************
 
@@ -165,9 +170,9 @@ export default {
           //     return d.children || d._children ? "end" : "start";
           // })
           .text(function(d) { return d.data.name; })
-          .call(localThis.wrap, 150)
+          .call(localThis.wrap, 100)
           .attr("transform", function(d) { 
-            return "translate(" + 0 + "," + (-d.y + 20) + ")";
+            return "translate(" + 0 + "," + -(d.y+25) + ")";
         });
           // .on("click", localThis.updateText);
 
@@ -178,12 +183,16 @@ export default {
       nodeUpdate.transition()
         .duration(this.duration)
         .attr("transform", function(d) { 
+          if (d._children || d.children) {
             return "translate(" + d.x + "," + d.y + ")";
+          } else {
+            return "translate(" + d.x + "," + d.y + ")";
+          }
         });
 
       // Update the node attributes and style
       nodeUpdate.select('circle.node')
-        .attr('r', 10)
+        .attr('r', 50)
         .style("fill", function(d) {
             return d._children ? "lightsteelblue" : "#fff";
         })
@@ -273,12 +282,6 @@ export default {
       svg = d3.select(".graph").append("svg")
           .attr("width", width + margin.right + margin.left)
           .attr("height", height + margin.top + margin.bottom)
-  //         .data(d3.entries( { "top-to-bottom": {
-  //   size: [width, height],
-  //   x: function(d) { return d.x; },
-  //   y: function(d) { return d.y; }
-  // }
-  //         }))
         .append("g")
         .attr("class","foobar")
           .attr("transform", "translate("
@@ -292,7 +295,7 @@ export default {
     var root;
 
     // declares a tree layout and assigns the size
-    var treemap = d3.tree().size([height  / 2, width]);
+    var treemap = d3.tree().size([width, height / 2]);
     this.treemap =treemap;
 
     // Assigns parent, children, height, depth
